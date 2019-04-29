@@ -19,6 +19,7 @@ namespace SpiceApp.BusinessLayer.Concretes
             {
                 if (!UserValidation.CheckIfUsernameExists(entity.Username, res))
                 {
+                    // hash the user password before it's saved in the db.
                     entity.Password = BCrypt.Net.BCrypt.HashPassword(entity.Password);
                     try
                     {
@@ -37,6 +38,7 @@ namespace SpiceApp.BusinessLayer.Concretes
                 else
                 {
                     res.isSuccess = false;
+                    res.Message = "Kullanıcı ismi bir başkası tarafından kullanılıyor";
                 }
 
                 return res;
@@ -58,7 +60,7 @@ namespace SpiceApp.BusinessLayer.Concretes
                     var user = repo.FetchByUsername(Username);
                     if (user != null)
                     {
-                        if (BCrypt.Net.BCrypt.Verify(Password, user.Password))
+                        if (BCrypt.Net.BCrypt.Verify(Password, user.Password)) // compare encrypted password with the given one. if matched, return matched user info. 
                         {
                             res.Message = "Sisteme giriş başarılı";
                             res.isSuccess = true;
@@ -94,7 +96,6 @@ namespace SpiceApp.BusinessLayer.Concretes
             {
                 using(var repo = new UserRepository())
                 {
-                    entity.Password = BCrypt.Net.BCrypt.HashPassword(entity.Password);
                     res.isSuccess = repo.Update(entity);
                     if (res.isSuccess)
                         res.Message = "Kullanıcı bilgileriniz başarıyla güncellendi";
@@ -126,6 +127,29 @@ namespace SpiceApp.BusinessLayer.Concretes
             catch (Exception ex)
             {
                 throw new Exception("An error occured in FetchAllCustomers() in SpiceApp.BusinessLayer.UserBusiness",ex);
+            }
+        }
+
+        public Response<User> ChangePassword(int UserID, string NewPassword)
+        {
+            Response<User> res = new Response<User>();
+            NewPassword = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            try
+            {
+                using(var repo = new UserRepository())
+                {
+                    res.isSuccess = repo.ChangePassword(UserID, NewPassword);
+
+                    if (res.isSuccess)
+                        res.Message = "Şifre başarı ile değiştirildi";
+                    else
+                        res.Message = "Şifre değiştirilirken bir hata meydana geldi";
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occured in SpiceApp.BusinessLayer.UserBusiness", ex);
             }
         }
 

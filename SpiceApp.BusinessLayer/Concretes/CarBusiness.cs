@@ -52,7 +52,8 @@ namespace SpiceApp.BusinessLayer.Concretes
                     res.isSuccess = repo.Insert(entity);
                     if (res.isSuccess)
                         res.Message = "Araba başarıyla eklendi";
-                    res.Message = "Araba eklenirken bir sorun ile karşılaşıldı";
+                    else 
+                        res.Message = "Araba eklenirken bir sorun ile karşılaşıldı";
                     return res;
                 }
             }
@@ -156,6 +157,7 @@ namespace SpiceApp.BusinessLayer.Concretes
                 throw new Exception("An error occured in UpdateCar() function in SpiceApp.BusinessLayer.CarBusiness", ex);
             }
         }
+
         public void Dispose()
         {
             GC.SuppressFinalize(this);

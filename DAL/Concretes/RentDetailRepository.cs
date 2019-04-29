@@ -33,16 +33,15 @@ namespace SpiceApp.DataAccessLayer.Concretes
 
         public RentDetail FetchById(int id)
         {
+            // responsible for getting a rent detail with given id from the db.
             try
             {
                 RentDetail entity = null;
                 using(var cmd = dBConnection.GetSqlCommand())
                 {
+                    // will select all the fields in rent detail table.
                     cmd.CommandText = DBCommandCreator.SELECT(new string[] { "*" }, DBTableNames.RentDetail, "WHERE kiraID = @kiraID");
                     DBCommandCreator.AddParameter(cmd,"@kiraID",DbType.Int32,ParameterDirection.Input, id);
-
-                    CarRepository carRepo = new CarRepository();
-                    UserRepository userRepo = new UserRepository();
 
                     using(var reader = cmd.ExecuteReader())
                     {
@@ -50,6 +49,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         {
                             while(reader.Read())
                             {
+                                // creating rent detail instance from fetched db values.
                                 entity = new RentDetail()
                                 {
                                     StartingDate = reader.GetDateTime(2),
@@ -60,8 +60,9 @@ namespace SpiceApp.DataAccessLayer.Concretes
                                     isCarRecievedBack = reader.GetBoolean(7),
                                     RecievedBackAt = reader.IsDBNull(8) ? new DateTime(1111,11,11) : reader.GetDateTime(8)
                                 };
-                                entity.Car = carRepo.FetchById(reader.GetInt32(0));
-                                entity.User = userRepo.FetchById(reader.GetInt32(1));
+                                // we have ids of corresponding car and user so get them by using their repositories
+                                entity.Car = new CarRepository().FetchById(reader.GetInt32(0));
+                                entity.User = new UserRepository().FetchById(reader.GetInt32(1));
 
                             }
                         }
@@ -78,7 +79,11 @@ namespace SpiceApp.DataAccessLayer.Concretes
   
         public bool Insert(RentDetail entity)
         {
+            // responsible for adding new rent detail to the db.
+
+            // clean the attribute. otherwise values left from previous operations may cause conflict
             _rowsAffected = 0;
+
             try
             {
                 using (var cmd = dBConnection.GetSqlCommand())
@@ -86,28 +91,32 @@ namespace SpiceApp.DataAccessLayer.Concretes
                     cmd.CommandText = DBCommandCreator.EXEC(new string[] { "rezID" }, "SP_anahtarTeslim");
                     DBCommandCreator.AddParameter(cmd, "@rezID", DbType.Int32, ParameterDirection.Input,entity.RentID);
                     _rowsAffected = cmd.ExecuteNonQuery();
-
-                    return _rowsAffected > 0;
                 }
+                // if added, affected rows will be greater than 0
+                return _rowsAffected > 0;
             }
             catch (Exception ex)
             {
-
                 throw new Exception("An error occured in ReservaationRepository in SpiceApp.DataAccessLayer.ReservationRepository ", ex);
             }
         }
 
         public List<RentDetail> FetchAllRentDetail(int UserID)
         {
+            // check for out dated reservations, if there is then cancel them
+            DBAdjuster.AdjustReservations();
+
+            //responsible for fetching all rent details from db according to given userID.
+            // if userID belongs to a customer, stored procedure will return customer's rent details
+            // if userID belongs to a employee, stored procedure will return employee's company's rent details
             try
             {
                 List<RentDetail> rents = new List<RentDetail>();
                 using(var cmd = dBConnection.GetSqlCommand())
                 {
+                    // define command text with the help of DBCommandCreator utility class then give user ıd parameter to the query.
                     cmd.CommandText = DBCommandCreator.EXEC(new string[] { "kullaniciID" }, "SP_kiraGoruntule");
                     DBCommandCreator.AddParameter(cmd,"@kullaniciID",DbType.Int32,ParameterDirection.Input, UserID);
-                    CarRepository carRepo = new CarRepository();
-                    UserRepository userRepo = new UserRepository();
 
                     using(var reader = cmd.ExecuteReader())
                     {
@@ -115,6 +124,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         {
                             while(reader.Read())
                             {
+                                // create rent detail instance
                                 var entity = new RentDetail()
                                 {
                                     StartingDate = reader.GetDateTime(2),
@@ -125,9 +135,10 @@ namespace SpiceApp.DataAccessLayer.Concretes
                                     isCarRecievedBack = reader.GetBoolean(7),
                                     RecievedBackAt = reader.IsDBNull(8) ? new DateTime(1111,11,11):reader.GetDateTime(8)
                                 };
-                                entity.Car = carRepo.FetchById(reader.GetInt32(0));
-                                entity.User = userRepo.FetchById(reader.GetInt32(1));
+                                entity.Car = new CarRepository().FetchById(reader.GetInt32(0));
+                                entity.User = new UserRepository().FetchById(reader.GetInt32(1));
 
+                                // add the instance to the list
                                 rents.Add(entity);
                             }
                         }
@@ -144,16 +155,30 @@ namespace SpiceApp.DataAccessLayer.Concretes
 
         public bool ReturnCarToCompany(int RentID, int KmInfo, int Score)
         {
-            _rowsAffected = 0;
-            using (var cmd = dBConnection.GetSqlCommand())
-            {
-                cmd.CommandText = DBCommandCreator.EXEC(new string[] {"kiraID","anlikKm","puan"}, "SP_aracIade");
-                DBCommandCreator.AddParameter(cmd, "@kiraID", DbType.Int32, ParameterDirection.Input, RentID);
-                DBCommandCreator.AddParameter(cmd, "@anlikKm", DbType.Int32, ParameterDirection.Input, KmInfo);
-                DBCommandCreator.AddParameter(cmd, "@puan", DbType.Int32, ParameterDirection.Input, Score);
 
-                _rowsAffected = cmd.ExecuteNonQuery();
+            // responsible for completing the whole rent process. When the customer return the car to company, rent process ends.
+
+            // clean the attribute. otherwise values left from previous operations may cause conflict
+            _rowsAffected = 0;
+
+            try
+            {
+                using (var cmd = dBConnection.GetSqlCommand())
+                {
+                    cmd.CommandText = DBCommandCreator.EXEC(new string[] { "kiraID", "anlikKm", "puan" }, "SP_aracIade");
+                    DBCommandCreator.AddParameter(cmd, "@kiraID", DbType.Int32, ParameterDirection.Input, RentID);
+                    DBCommandCreator.AddParameter(cmd, "@anlikKm", DbType.Int32, ParameterDirection.Input, KmInfo);
+                    DBCommandCreator.AddParameter(cmd, "@puan", DbType.Int32, ParameterDirection.Input, Score);
+                    _rowsAffected = cmd.ExecuteNonQuery();
+                    
+                }
+                // if succesful, affected rows will be greater than 0
                 return _rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("An error occured in ReturnCarToCompany() in SpiceApp.DataAccessLayer.RentDetailRepository",ex);
             }
         }
 

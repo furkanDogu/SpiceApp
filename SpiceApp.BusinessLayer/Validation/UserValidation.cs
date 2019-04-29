@@ -12,6 +12,7 @@ namespace SpiceApp.BusinessLayer.Validation
     {   
         public static bool CheckIfUsernameExists(string Username, Response<User> res)
         {
+            // if any user returns from db with given username, it means that the username is already used. so return false.
             using(var userRepo = new UserRepository())
             {
                 var user = userRepo.FetchByUsername(Username);

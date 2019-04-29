@@ -29,19 +29,18 @@ namespace SpiceApp.DataAccessLayer.Concretes
 
         public List<Reservation> FetchAllByUserId(int UserID)
         {
+            // check for out dated reservations, if there is then cancel them.
+            DBAdjuster.AdjustReservations();
+            
             //this function will be used for showing reservations either for user or employee. If the given ID belongs to employee, function will show companies reservations.
             List<Reservation> list = new List<Reservation>();
             try
             {
                 using(var cmd = dBConnection.GetSqlCommand())
                 {
+                    // defining the command text and giving input parameter's value
                     cmd.CommandText = DBCommandCreator.EXEC(new string[] { "kullaniciID" }, "SP_rezGoruntule");
                     DBCommandCreator.AddParameter(cmd, "@kullaniciID", DbType.Int32, ParameterDirection.Input, UserID);
-
-                    CompanyRepository companyRepo = new CompanyRepository();
-                    CarRepository carRepo = new CarRepository();
-                    UserRepository userRepo = new UserRepository();
-
                     
                     using(var reader = cmd.ExecuteReader())
                     {
@@ -49,15 +48,18 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         {
                             while(reader.Read())
                             {
+                                // create reservation instance
                                 var entity = new Reservation()
                                 {
-                                    Car = carRepo.FetchById(reader.GetInt32(0)),
-                                    User = userRepo.FetchById(UserID),
+                                    Car = new CarRepository().FetchById(reader.GetInt32(0)),
+                                    User = new UserRepository().FetchById(UserID),
                                     StartingDate = reader.GetDateTime(2),
                                     EndDate = reader.GetDateTime(3),
                                     ReservationID = reader.GetInt32(4),
                                     ReservationMadeAt = reader.GetDateTime(5),
                                 };
+                                // To define reservation state, we have 3 different boolean values in database.
+                                // So ConvertResvState function composes these 3 values to one to make client's work easier.
                                 entity.ReservationState = ResvAttrConverter.ConvertResvState(reader.GetBoolean(6), reader.GetBoolean(7), reader.GetBoolean(8));
                                 entity.Company = entity.Car.Company;
                                 list.Add(entity);
@@ -134,12 +136,12 @@ namespace SpiceApp.DataAccessLayer.Concretes
 
         public Reservation FetchById(int id)
         {
-            // Todo
             throw new NotImplementedException();
         }
 
         public bool DeleteById(int ReservationID)
         {
+            // responsible for cancelling reservation with the given res. id.
             _rowsAffected = 0;
 
             using (var cmd = dBConnection.GetSqlCommand())
@@ -155,7 +157,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
 
         public bool Insert(Reservation entity)
         {
-            /* Car.CarID, User.UserID, DateTime startingDate, DateTime endDate*/
+            /* Car.CarID, User.UserID, DateTime startingDate, DateTime endDate  fields need to be given in the parameter */
             _rowsAffected = 0;
             try
             {

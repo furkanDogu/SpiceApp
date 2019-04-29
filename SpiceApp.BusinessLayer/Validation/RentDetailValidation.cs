@@ -11,7 +11,7 @@ namespace SpiceApp.BusinessLayer.Validation
     {
         public static bool ValidateTheScore(int Score)
         {
-            // needs to be 1-5
+            // needs to be in 1-5
             if (Score < 1 || Score > 5) return false;
             return true;
         }

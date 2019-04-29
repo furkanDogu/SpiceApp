@@ -87,7 +87,8 @@ namespace SpiceApp.BusinessLayer.Concretes
         {
             Response<RentDetail> res = new Response<RentDetail>();
 
-            if (RentDetailValidation.ValidateTheScore(Score) && RentDetailValidation.ValiteKmInfo(KmInfo, RentID))
+            // check if the score in 1-5 range and km info is valid 
+            if (RentDetailValidation.ValidateTheScore(Score) && RentDetailValidation.ValiteKmInfo(KmInfo, RentID)) 
             {
                 try
                 {

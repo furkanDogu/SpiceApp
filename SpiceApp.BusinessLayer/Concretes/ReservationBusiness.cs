@@ -17,7 +17,7 @@ namespace SpiceApp.BusinessLayer.Concretes
             try
             {
                 Response<Car> res = new Response<Car>();
-                if (DateValidation.CheckIfValid(startingDate, endTime))
+                if (DateValidation.CheckIfValid(startingDate, endTime)) // check the dates if they are valid (more detail in the function definition)
                 {
                     using (var repo = new ReservationRepository())
                     {
@@ -87,7 +87,7 @@ namespace SpiceApp.BusinessLayer.Concretes
             {
                 Reservation reservation = new Reservation() { Car = new Car() { CarID = CarID}, User = new User() { UserID = UserID}, StartingDate = startingDate, EndDate = endTime };
                 Response<Reservation> res = new Response<Reservation>();
-                if (DateValidation.CheckIfValid(startingDate, endTime))
+                if (DateValidation.CheckIfValid(startingDate, endTime))  // check the dates if they are valid (more detail in the function definition)
                 {
                     using (var repo = new ReservationRepository())
                     {

@@ -24,13 +24,14 @@ namespace SpiceApp.DataAccessLayer.Concretes
         }
         public Company FetchById(int CompanyID)
         {
+            //responsible for getting company info with given company id.
+
             Company entity = null;
             try
             {
                 using(var cmd = dBConnection.GetSqlCommand())
                 {
-                    string condition = "WHERE sirketID = @CompanyID";
-                    cmd.CommandText = DBCommandCreator.SELECT(new string[] {"sirketID","sirketAd","tel","sehir","adres","aracSayisi","sirketPuan"}, DBTableNames.Company, condition);
+                    cmd.CommandText = DBCommandCreator.SELECT(new string[] {"sirketID","sirketAd","tel","sehir","adres","aracSayisi","sirketPuan"}, DBTableNames.Company, "WHERE sirketID = @CompanyID");
                     DBCommandCreator.AddParameter(cmd, "@CompanyID", DbType.Int32, ParameterDirection.Input, CompanyID);
 
                     using(var reader = cmd.ExecuteReader())
@@ -39,6 +40,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         {
                             while(reader.Read())
                             {
+                                // create company instance with fetched info
                                 entity = new Company()
                                 {
                                     CompanyID = reader.GetInt32(0),

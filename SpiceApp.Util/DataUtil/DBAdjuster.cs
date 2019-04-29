@@ -11,7 +11,7 @@ namespace SpiceApp.Util.DataUtil
         private static DBConnection dbConnection = new DBConnection();
         public static void AdjustReservations()
         {
-            // This func. is responsible for checking  
+            // This func. is responsible for checking reservation dates if there is any out dated reservation.
             using (var cmd = dbConnection.GetSqlCommand())
             {
                 cmd.CommandText = DBCommandCreator.EXEC(new string[0], "SP_rezKontrol");
