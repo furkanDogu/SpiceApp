@@ -7,6 +7,7 @@ using SpiceApp.Models.Entities;
 using SpiceApp.Util.DataUtil;
 using System.Data;
 using SpiceApp.DataAccessLayer.Interfaces;
+using System.Data.SqlClient;
 
 
 namespace SpiceApp.DataAccessLayer.Concretes
@@ -36,35 +37,44 @@ namespace SpiceApp.DataAccessLayer.Concretes
             // responsible for getting the brand with the given id.
 
             Brand entity = null;
+
+            //open connection
+            dBConnection.OpenConnection();
+            SqlCommand cmd = new SqlCommand();
+            SqlDataReader reader = null;
+
             try
             {
-                using (var cmd = dBConnection.GetSqlCommand())
-                {
-                    // creating command text with DBCommandCreator utility class
-                    cmd.CommandText = DBCommandCreator.SELECT(new string[] { "markaID", "marka" }, DBTableNames.Brand, "WHERE markaID = @BrandID");
-                    DBCommandCreator.AddParameter(cmd, "@BrandID", DbType.Int32, ParameterDirection.Input, BrandID);
+                // creating command text with DBCommandCreator utility class
+                cmd.CommandText = DBCommandCreator.SELECT(new string[] { "markaID", "marka" }, DBTableNames.Brand, "WHERE markaID = @BrandID");
+                DBCommandCreator.AddParameter(cmd, "@BrandID", DbType.Int32, ParameterDirection.Input, BrandID);
 
-                    using (var reader = cmd.ExecuteReader())
+                // execute the query
+                reader = dBConnection.DataReader(cmd);
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
                     {
-                        if (reader.HasRows)
+                        // creating brand instance with fetched values
+                        entity = new Brand()
                         {
-                            while (reader.Read())
-                            {
-                                // creating brand instance with fetched values
-                                entity = new Brand()
-                                {
-                                    BrandID = reader.GetInt32(0),
-                                    BrandName = reader.GetString(1)
-                                };
-                            }
-                        }
+                            BrandID = reader.GetInt32(0),
+                            BrandName = reader.GetString(1)
+                        };
                     }
                 }
+
                 return entity;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("An error occured while executing FetchByID() in SpiceApp.DataAccessLayer.BrandRepository", ex);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                dBConnection.CloseConnection();
             }
         }
 
@@ -73,62 +83,78 @@ namespace SpiceApp.DataAccessLayer.Concretes
             // responsible for getting all brands from the db.
 
             List<Brand> brands = new List<Brand>();
+
+            //open connection
+            dBConnection.OpenConnection();
+            SqlCommand cmd = new SqlCommand();
+            SqlDataReader reader = null;
+
             try
             {
-                using(var cmd = dBConnection.GetSqlCommand())
+                // there won't be  a condition in this query so we give String.Empty value to the last parameter.
+                cmd.CommandText = DBCommandCreator.SELECT(new string[] { "markaID", "marka" }, DBTableNames.Brand, String.Empty);
+
+                //execute query and get values
+                reader = dBConnection.DataReader(cmd);
+                if (reader.HasRows)
                 {
-                    // there won't be  a condition in this query so we give String.Empty value to the last parameter.
-                    cmd.CommandText = DBCommandCreator.SELECT(new string[] {"markaID", "marka"}, DBTableNames.Brand, String.Empty);
-                    
-                    using(var reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        if(reader.HasRows)
+                        // create brand instance
+                        var entity = new Brand()
                         {
-                            while(reader.Read())
-                            {
-                                // create brand instance
-                                var entity = new Brand()
-                                {
-                                    BrandID = reader.GetInt32(0),
-                                    BrandName = reader.GetString(1)
-                                };
-                                //add it to the brand list
-                                brands.Add(entity);
-                            }
-                        }
+                            BrandID = reader.GetInt32(0),
+                            BrandName = reader.GetString(1)
+                        };
+
+                        //add it to the brand list
+                        brands.Add(entity);
                     }
-                    return brands;
+
                 }
+                return brands;
             }
             catch (Exception ex)
             {
-
-                throw new Exception("An error occured in FetchAllBrands in SpiceApp.DataAccessLayer.BrandRepository",ex);
+                throw new Exception("An error occured in FetchAllBrands in SpiceApp.DataAccessLayer.BrandRepository", ex);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                dBConnection.CloseConnection();
             }
         }
 
         public bool Insert(Brand entity)
         {
             // responsible for inserting new brands to the db.
-            
+
             // clean the attribute. otherwise values left from previous operations may cause conflict
             _rowsAffected = 0;
+
+            //open connection
+            SqlCommand cmd = new SqlCommand();
+            dBConnection.OpenConnection();
+
             try
             {
-                using(var cmd = dBConnection.GetSqlCommand())
-                {
-                    cmd.CommandText = DBCommandCreator.INSERT(new string[] {"marka"},DBTableNames.Brand);
-                    DBCommandCreator.AddParameter(cmd, "@marka", DbType.String, ParameterDirection.Input, entity.BrandName);
-                    _rowsAffected = cmd.ExecuteNonQuery();
+                cmd.CommandText = DBCommandCreator.INSERT(new string[] { "marka" }, DBTableNames.Brand);
+                DBCommandCreator.AddParameter(cmd, "@marka", DbType.String, ParameterDirection.Input, entity.BrandName);
 
-                    // if added, affected rows will be greater than 0
-                    return _rowsAffected > 0;
-                }
+                //execute query
+                _rowsAffected = dBConnection.ExecuteQueries(cmd);
 
+                // if added, affected rows will be greater than 0
+                return _rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occured in Insert() function in SpiceApp.DataAccessLayer.BrandRepository",ex);
+                throw new Exception("An error occured in Insert() function in SpiceApp.DataAccessLayer.BrandRepository", ex);
+            }
+            finally
+            {
+                dBConnection.CloseConnection();
             }
         }
 
@@ -139,23 +165,30 @@ namespace SpiceApp.DataAccessLayer.Concretes
             // clean the attribute. otherwise values left from previous operations may cause conflict
             _rowsAffected = 0;
 
+            //open connection
+            dBConnection.OpenConnection();
+            SqlCommand cmd = new SqlCommand();
+
             try
             {
-                using (var cmd = dBConnection.GetSqlCommand())
-                {
-                    cmd.CommandText = "UPDATE tblMarka SET marka = @marka WHERE markaID = @markaID";
-                    DBCommandCreator.AddParameter(cmd, "@marka", DbType.String, ParameterDirection.Input, entity.BrandName);
-                    DBCommandCreator.AddParameter(cmd, "@markaID", DbType.Int32, ParameterDirection.Input, entity.BrandID);
+                //create query
+                cmd.CommandText = "UPDATE tblMarka SET marka = @marka WHERE markaID = @markaID";
+                DBCommandCreator.AddParameter(cmd, "@marka", DbType.String, ParameterDirection.Input, entity.BrandName);
+                DBCommandCreator.AddParameter(cmd, "@markaID", DbType.Int32, ParameterDirection.Input, entity.BrandID);
 
-                    _rowsAffected = cmd.ExecuteNonQuery();
+                //execute
+                _rowsAffected = dBConnection.ExecuteQueries(cmd);
 
-                    // if updated, affected rows will be greater than 0
-                    return _rowsAffected > 0;
-                }
+                // if updated, affected rows will be greater than 0
+                return _rowsAffected > 0;
             }
             catch (Exception ex)
             {
                 throw new Exception("An error occured in Update() func. in SpiceApp.DataAccessLayer.BrandRepository", ex);
+            }
+            finally
+            {
+                dBConnection.CloseConnection();
             }
         }
 

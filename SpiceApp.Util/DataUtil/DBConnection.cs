@@ -8,41 +8,43 @@ using System.Threading.Tasks;
 
 namespace SpiceApp.Util.DataUtil
 {
-    public class DBConnection : IDisposable
+    public class DBConnection
     {
-        private readonly string _connectionString;
 
-        public DBConnection()
-        {
-            _connectionString = "Data Source=FURKAN;Initial Catalog=OtoKiralama;Integrated Security=True";
-        }
-        
-        private SqlConnection GetSqlConnection()
-        {
-            SqlConnection conn = new SqlConnection(_connectionString);
+        string ConnectionString = "Data Source = FURKAN; Initial Catalog = OtoKiralama; Integrated Security = True";
+        private SqlConnection con;
 
-            if(conn.State == ConnectionState.Open)
-            {
-                conn.Close();
-                conn.Open();
-            }
-            else
-            {
-                conn.Open();
-            }
-            return conn;
+        public void OpenConnection()
+        {
+            con = new SqlConnection(ConnectionString);
+            con.Open();
         }
 
-        public SqlCommand GetSqlCommand()
+
+        public void CloseConnection()
         {
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = GetSqlConnection();
-            return cmd;
+            con.Close();
         }
 
-        public void Dispose()
+
+        public int ExecuteQueries(SqlCommand cmd)
         {
-            GC.SuppressFinalize(this);
+            cmd.Connection = con;
+            return  cmd.ExecuteNonQuery();
+        }
+
+        public object ExecuteScalar(SqlCommand cmd)
+        {
+            cmd.Connection = con;
+            return cmd.ExecuteScalar();
+        }
+
+
+        public SqlDataReader DataReader(SqlCommand cmd)
+        {
+            cmd.Connection = con;
+            SqlDataReader dr = cmd.ExecuteReader();
+            return dr;
         }
     }
 }
