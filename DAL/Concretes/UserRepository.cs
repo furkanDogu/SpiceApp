@@ -52,7 +52,8 @@ namespace SpiceApp.DataAccessLayer.Concretes
                                 {
                                     Username = reader.GetString(0),
                                     Person = FetchPersonByID(reader.GetInt32(2)),
-                                    Role = new Role() { Name = reader.GetInt32(3) == 1 ? "Calisan" : "Musteri", RoleID = reader.GetInt32(3) }
+                                    Role = new Role() { Name = reader.GetInt32(3) == 1 ? "Calisan" : "Musteri", RoleID = reader.GetInt32(3) },
+                                    UserID = reader.GetInt32(4)
                                 };
                             }
                         }
@@ -89,7 +90,8 @@ namespace SpiceApp.DataAccessLayer.Concretes
                                     Username = reader.GetString(0),
                                     Password = reader.GetString(1),
                                     Person = FetchPersonByID(reader.GetInt32(2)),
-                                    Role = new Role() { Name = reader.GetInt32(3) == 1 ? "Calisan" : "Musteri", RoleID = reader.GetInt32(3) }
+                                    Role = new Role() { Name = reader.GetInt32(3) == 1 ? "Calisan" : "Musteri", RoleID = reader.GetInt32(3) },
+                                    UserID = reader.GetInt32(4)
                                 };
                             }
                         }
