@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using System.Data;
-using System.Threading.Tasks;
+
 
 namespace SpiceApp.Util.DataUtil
 {
@@ -24,6 +23,7 @@ namespace SpiceApp.Util.DataUtil
         public void CloseConnection()
         {
             con.Close();
+            con.Dispose();
         }
 
 
