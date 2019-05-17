@@ -47,6 +47,7 @@
     <Compile Include="Concretes\BrandBusiness.cs" />
     <Compile Include="Concretes\CarBusiness.cs" />
     <Compile Include="Concretes\RentDetailBusiness.cs" />
+    <Compile Include="Concretes\ReportBusiness.cs" />
     <Compile Include="Concretes\ReservationBusiness.cs" />
     <Compile Include="Concretes\UserBusiness.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -77,12 +77,14 @@ namespace SpiceApp.BusinessLayer.Concretes
             res.Data = new List<Brand>();
             try
             {
-                using(var repo = new BrandRepository())
+                Brand temp = null;
+                using (var repo = new BrandRepository())
                 {
-                    res.Data.Add(repo.FetchById(BrandID));
+                     temp = repo.FetchById(BrandID);
                 }
-                if (res.Data.Count > 0)
+                if (temp != null)
                 {
+                    res.Data.Add(temp);
                     res.isSuccess = true;
                     res.Message = "Marka başarıyla getirildi";
                 }

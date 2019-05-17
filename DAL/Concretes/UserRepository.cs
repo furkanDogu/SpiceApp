@@ -148,12 +148,11 @@ namespace SpiceApp.DataAccessLayer.Concretes
             {
                 // first add the person object to the db. It holds detailed information of user.
                 InsertPerson(entity.Person);
-
+                dBConnection.OpenConnection();
                 int id = 0; // will hold the last added person's id
 
                 // the last added person will have the greatest id value so bring it from the db.
                 cmd.CommandText = DBCommandCreator.SELECT(new string[] { "kisiID" }, DBTableNames.Person, "WHERE kisiID = (SELECT MAX(kisiID) FROM tblKisi)");
-
                 reader = dBConnection.DataReader(cmd);
                 if (reader.HasRows)
                 {

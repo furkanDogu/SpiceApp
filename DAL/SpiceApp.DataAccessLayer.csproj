@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Concretes\BrandRepository.cs" />
     <Compile Include="Concretes\CarRepository.cs" />
+    <Compile Include="Concretes\ReportRepository.cs" />
     <Compile Include="Concretes\CompanyRepository.cs" />
     <Compile Include="Concretes\RentDetailRepository.cs" />
     <Compile Include="Concretes\ReservationRepository.cs" />

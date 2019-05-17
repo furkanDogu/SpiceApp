@@ -70,10 +70,12 @@ namespace SpiceApp.BusinessLayer.Concretes
             {
                 using (var repo = new CarRepository())
                 {
+                    
                     res.Data = new List<Car>();
-                    res.Data.Add(repo.FetchById(CarID));
-                    if(res.Data.Count > 0)
+                    Car temp = repo.FetchById(CarID);
+                    if (temp != null)
                     {
+                        res.Data.Add(temp);
                         res.Message = "İlgili arabanın detayları ";
                         res.isSuccess = true;
                     }

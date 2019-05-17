@@ -62,9 +62,10 @@ namespace SpiceApp.BusinessLayer.Concretes
                 using(var rentDetailRepo = new RentDetailRepository())
                 {
                     res.Data = new List<RentDetail>();
-                    res.Data.Add(rentDetailRepo.FetchById(id));
-                    if(res.Data != null)
+                    RentDetail temp = rentDetailRepo.FetchById(id);
+                    if(temp != null)
                     {
+                        res.Data.Add(temp);
                         res.isSuccess = true;
                         res.Message = "Kira detay bilgisi gösteriliyor";
                     }
