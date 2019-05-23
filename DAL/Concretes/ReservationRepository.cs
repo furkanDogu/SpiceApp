@@ -54,11 +54,11 @@ namespace SpiceApp.DataAccessLayer.Concretes
                             // create reservation instance
                             var entity = new Reservation()
                             {
-                                Car = new CarRepository().FetchById(reader.GetInt32(0)),
+                                Car = new CarRepository().FetchById(reader.GetInt32(1)),
                                 User = new UserRepository().FetchById(UserID),
-                                StartingDate = reader.GetDateTime(2),
-                                EndDate = reader.GetDateTime(3),
-                                ReservationID = reader.GetInt32(4),
+                                StartingDate = reader.GetDateTime(3),
+                                EndDate = reader.GetDateTime(4),
+                                ReservationID = reader.GetInt32(0),
                                 ReservationMadeAt = reader.GetDateTime(5),
                             };
                             // To define reservation state, we have 3 different boolean values in database.
