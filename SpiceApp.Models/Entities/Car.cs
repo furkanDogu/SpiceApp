@@ -37,6 +37,8 @@ namespace SpiceApp.Models.Entities
 
         public Company Company { get; set; }
 
+        public int DailyKm { get; set; }
+
 
 
 

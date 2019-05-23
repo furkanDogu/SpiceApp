@@ -75,7 +75,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         "minYas",
                         "anlikKm","airbag",
                         "bagajHacmi","gunlukFiyat",
-                        "sirketID","markaID" },
+                        "sirketID","markaID", "gunlukKm" },
                     DBTableNames.Cars);
 
                 // adding parameter values
@@ -88,6 +88,7 @@ namespace SpiceApp.DataAccessLayer.Concretes
                 DBCommandCreator.AddParameter(cmd, "@anlikKm", DbType.Int32, ParameterDirection.Input, entity.KmInfo);
                 DBCommandCreator.AddParameter(cmd, "@sirketID", DbType.Int32, ParameterDirection.Input, entity.Company.CompanyID);
                 DBCommandCreator.AddParameter(cmd, "@markaID", DbType.Int32, ParameterDirection.Input, entity.Brand.BrandID);
+                DBCommandCreator.AddParameter(cmd, "@gunlukKm", DbType.Int32, ParameterDirection.Input, entity.DailyKm);
 
 
                 _rowsAffected = dBConnection.ExecuteQueries(cmd);
