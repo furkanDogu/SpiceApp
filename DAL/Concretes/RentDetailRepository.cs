@@ -146,16 +146,16 @@ namespace SpiceApp.DataAccessLayer.Concretes
                         // create rent detail instance
                         var entity = new RentDetail()
                         {
-                            StartingDate = reader.GetDateTime(2),
-                            EndDate = reader.GetDateTime(3),
-                            KmUsed = reader.GetInt32(4),
-                            Cost = reader.GetInt32(5),
-                            RentID = reader.GetInt32(6),
+                            StartingDate = reader.GetDateTime(3),
+                            EndDate = reader.GetDateTime(4),
+                            KmUsed = reader.GetInt32(5),
+                            Cost = reader.GetInt32(6),
+                            RentID = reader.GetInt32(0),
                             isCarRecievedBack = reader.GetBoolean(7),
                             RecievedBackAt = reader.IsDBNull(8) ? new DateTime(1111, 11, 11) : reader.GetDateTime(8)
                         };
-                        entity.Car = new CarRepository().FetchById(reader.GetInt32(0));
-                        entity.User = new UserRepository().FetchById(reader.GetInt32(1));
+                        entity.Car = new CarRepository().FetchById(reader.GetInt32(1));
+                        entity.User = new UserRepository().FetchById(reader.GetInt32(2));
 
                         // add the instance to the list
                         rents.Add(entity);
